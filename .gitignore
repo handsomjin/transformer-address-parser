@@ -1,0 +1,24 @@
+# Conda 环境（绝不进版本控制）
+.env/
+env/
+
+# 数据与模型权重
+data/raw/*
+data/processed/*
+outputs/*
+*.pt
+*.bin
+*.safetensors
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 环境变量
+.env
+
+# 编辑器
+.idea/
+
+# mac 外接硬盘的隐藏文件
+._*

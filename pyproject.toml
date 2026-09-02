@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "transformer-address-parser"
+version = "0.1.0"
+description = "A transformer-based address parser using PaddleNLP"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Your Name", email = "your.email@example.com" }]
+requires-python = ">=3.10"
+dependencies = [
+    "paddlenlp==3.0.0b4",
+    "aistudio-sdk==0.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=24.0",
+    "ruff>=0.3.0",
+]
