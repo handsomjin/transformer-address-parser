@@ -1,10 +1,10 @@
-import json
 import paddle
 from paddle.io import Dataset
+from .negative_sample_generator import generate_negative_samples
 
 
 class AddressDataset(Dataset):
-    def __init__(self, data, tokenizer, label2id, max_src_len=128, max_tgt_len=3):
+    def __init__(self, label_map, raw_data, tokenizer, label2id, max_src_len=128, max_tgt_len=3):
         super().__init__()
         self.tokenizer = tokenizer
         self.label2id = label2id
@@ -13,7 +13,9 @@ class AddressDataset(Dataset):
         self.sos_id = label2id["<sos>"]
         self.eos_id = label2id["<eos>"]
         self.pad_id = label2id["<pad>"]
-        self.data = data
+        negatives = generate_negative_samples(label_map, raw_data, seed=42, rule2_prob=0.7)
+        self.data = raw_data + negatives
+        print(len(self.data))
 
     def __len__(self):
         return len(self.data)

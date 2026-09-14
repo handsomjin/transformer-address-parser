@@ -102,7 +102,10 @@ def build_train_dataset(data_path, label2id, tokenizer, label_map, max_src_len=1
             labels = f"{get_label(row['省'])},{get_label(row['市'])},{get_label(row['区'])}"
             data.append({
                 "text": text,  # 喂 tokenizer 用「无分隔符」的整串
-                "labels": labels  # 标签仍是按字拆好的 list
+                "labels": labels,  # 标签仍是按字拆好的 list
+                "省": row['省'],
+                "市": row['市'],
+                "区": row['区']
             })
 
         return data
@@ -110,6 +113,7 @@ def build_train_dataset(data_path, label2id, tokenizer, label_map, max_src_len=1
     # 数据集与数据加载器
     train_data = load_data_from_file(data_path)
     train_dataset = AddressDataset(
+        label_map,
         train_data,
         tokenizer,
         label2id,
@@ -120,6 +124,7 @@ def build_train_dataset(data_path, label2id, tokenizer, label_map, max_src_len=1
     # 数据集与数据加载器
     eval_data = load_data_from_file(data_path)
     eval_dataset = AddressDataset(
+        label_map,
         eval_data,
         tokenizer,
         label2id,
