@@ -152,7 +152,8 @@ def predict(text, model, tokenizer, label2id, id2label, code2name,
     result = []
     for idx in pred_ids:
         label_code = id2label.get(idx, "<unk>")
-        label_code = label_code.split('_', 1)[1]
+        if '_' in label_code:
+            label_code = label_code.split('_', 1)[1]
         result.append(label_code)
 
     # 确保输出三个元素（省、市、区），不足补空字符串
