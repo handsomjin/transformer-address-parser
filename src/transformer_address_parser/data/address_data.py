@@ -4,7 +4,7 @@ from .negative_sample_generator import generate_negative_samples
 
 
 class AddressDataset(Dataset):
-    def __init__(self, label_map, raw_data, tokenizer, label2id, max_src_len=128, max_tgt_len=3):
+    def __init__(self, raw_data, tokenizer, label2id, max_src_len=128, max_tgt_len=3):
         super().__init__()
         self.tokenizer = tokenizer
         self.label2id = label2id
@@ -13,8 +13,7 @@ class AddressDataset(Dataset):
         self.sos_id = label2id["<sos>"]
         self.eos_id = label2id["<eos>"]
         self.pad_id = label2id["<pad>"]
-        negatives = generate_negative_samples(label_map, raw_data, seed=42, rule2_prob=0.7)
-        self.data = raw_data + negatives
+        self.data = raw_data
         print(len(self.data))
 
     def __len__(self):
@@ -23,7 +22,7 @@ class AddressDataset(Dataset):
     def __getitem__(self, idx):
         sample = self.data[idx]
         text = sample["text"]
-        labels = sample["labels"].split(",")  # list of str, length=5
+        labels = [sample["lv1"], sample["lv2"], sample["lv3"]]
 
         # 编码源文本
         encoded = self.tokenizer(

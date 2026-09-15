@@ -15,7 +15,6 @@ class Trainer:
             model,
             optimizer,
             train_loader,  # ← 改：原来是 train_loader
-            eval_loader,  # ← 新增
             loss_fn,
             epochs=10,
             save_dir="./ckpt",
@@ -29,7 +28,6 @@ class Trainer:
 
         # 内部包 DataLoader
         self.train_loader = train_loader
-        self.eval_loader = eval_loader
 
         # best 追踪
         self.best_eval_loss = float("inf")

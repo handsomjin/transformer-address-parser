@@ -84,6 +84,8 @@ def generate_negative_samples(
     if seed is not None:
         random.seed(seed)
 
+    municipalities = ['北京', '天津', '上海', '重庆']
+
     results = []
     for row in data:
         text = row["text"]
@@ -93,27 +95,37 @@ def generate_negative_samples(
         dist = str(row.get('区', '')) if row.get('区') is not None else ''
 
         # 规则1
-        text_rule1 = text.replace('省', '').replace('市', '').replace('区', '')
+        text_rule1 = text.replace('省', '').replace('市', '').replace('区', '').replace('县', '')
         results.append({'text': text_rule1, 'province': prov, 'city': city, 'district': dist, 'labels': labels})
 
-        # 规则2
-        if city:
-            if random.random() < rule2_prob:
-                city_full = city
-                city_short = city.rstrip('市')
-                new_text = text
-                if city_full and city_full in new_text:
-                    new_text = new_text.replace(city_full, '', 1)
-                elif city_short and city_short in new_text:
-                    new_text = new_text.replace(city_short, '', 1)
-                new_city = ''
-            else:
-                new_text = text
-                new_city = city
-            results.append({'text': new_text, 'province': prov, 'city': new_city, 'district': dist, 'labels': labels})
+        # 判断是否为直辖市（使用省名 prov 进行匹配）
+        is_municipality = any(muni in prov for muni in municipalities)
+
+        # 规则2：随机移除城市名（仅在文本中包含省份信息时执行）
+        if city and not is_municipality:
+            # 检查文本中是否包含省份信息（全称或简称）
+            prov_full = prov
+            prov_short = prov.rstrip('省').rstrip('市').rstrip('自治区').rstrip('特别行政区')
+            contains_province = (prov_full and prov_full in text) or (prov_short and prov_short in text)
+            if contains_province:
+                if random.random() < rule2_prob:
+                    city_full = city
+                    city_short = city.rstrip('市')
+                    new_text = text
+                    if city_full and city_full in new_text:
+                        new_text = new_text.replace(city_full, '', 1)
+                    elif city_short and city_short in new_text:
+                        new_text = new_text.replace(city_short, '', 1)
+                    new_city = ''
+                else:
+                    new_text = text
+                    new_city = city
+                results.append(
+                    {'text': new_text, 'province': prov, 'city': new_city, 'district': dist, 'labels': labels})
+            # 如果文本中不包含省份信息，则不生成规则2的负样本
 
         # 规则3
-        if prov:
+        if prov and not is_municipality:
             new_prov = get_similar_province(prov)
             prov_full = prov
             prov_short = prov.rstrip('省').rstrip('市').rstrip('自治区').rstrip('特别行政区')
