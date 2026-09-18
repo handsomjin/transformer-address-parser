@@ -6,6 +6,7 @@ env/
 data/raw/*
 data/processed/*
 outputs/*
+models/onnx/model/*
 *.pt
 *.bin
 *.safetensors

@@ -34,9 +34,11 @@ def load_training_data(csv_file, tokenizer, label2id, max_src_len=128, max_tgt_l
             return "<unk>"
         return f"{level}_{code}"
 
-    df = pd.read_csv(csv_file, sep=",", header=0, dtype=str, nrows=3)
+    df = pd.read_csv(csv_file, sep=",", header=0, dtype=str, usecols=[0, 1, 2, 3])
     data = []
     for _, row in df.iterrows():
+        if pd.isna(row["address"]) or not isinstance(row["address"], str):
+            continue
         data.append({
             "text": row["address"],
             "lv1": get_code_segment(row["aa"], 1),
@@ -83,7 +85,7 @@ def build_optimizer(model, total_steps=None):
 
 def main():
     epochs = 10
-    batch_size = 32
+    batch_size = 16
     bert_name = "bert-base-chinese"
 
     tokenizer = BertTokenizer.from_pretrained(bert_name)

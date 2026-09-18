@@ -5,7 +5,7 @@ import sys
 import paddle
 import numpy as np
 from paddlenlp.transformers import BertTokenizer
-from src.transformer_address_parser.models.address_model import AddressModel
+from src.transformer_address_parser.runtime.address_model import AddressModel
 
 # 设置项目根目录
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,6 +56,7 @@ def predict(text, model, tokenizer, label2id, id2label,
     input_ids = paddle.to_tensor(encoded["input_ids"], dtype="int64")
     attention_mask = paddle.to_tensor(encoded["attention_mask"], dtype="int64")
     token_type_ids = paddle.to_tensor(encoded["token_type_ids"], dtype="int64")
+    encoder_output = model.encode(input_ids, token_type_ids, attention_mask)
 
     # 初始化解码器输入：<sos>
     sos_id = label2id.get("<sos>", None)
@@ -69,7 +70,11 @@ def predict(text, model, tokenizer, label2id, id2label,
 
     # 逐步生成
     for step in range(max_tgt_len):  # 最多生成 max_tgt_len+2 (含 sos 和 eos)
-        logits = model(input_ids, token_type_ids, attention_mask, decoder_input_ids)  # [1, seq_len, vocab_size]
+        logits = model(
+            decoder_input_ids=decoder_input_ids,
+            memory=encoder_output,  # 关键！直接使用缓存
+            tgt_mask=None  # 可根据需要生成 causal mask
+        )
         next_token_logits = logits[:, -1, :]  # 最后一个时间步的 logits
         next_token_id = paddle.argmax(next_token_logits, axis=-1).unsqueeze(-1)  # [1, 1]
 
